@@ -58,8 +58,6 @@ dependencies:
   url_launcher: ^6.1.14
   scroll_to_index: ^3.0.1
   sqflite: ^2.3.0
-  sqflite_common_ffi: ^2.3.0
-  sqflite_common_ffi_web: ^1.1.1
   path: ^1.8.3
   sticky_headers: ^0.3.0+2
   flutter_cache_manager: ^3.3.1

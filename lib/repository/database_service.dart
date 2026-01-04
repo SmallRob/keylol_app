@@ -1,9 +1,6 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:sqflite/sqflite.dart';
 
-// Web 平台特定的导入
-import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart' as sqflite_ffi_web;
-
 const String historyDdl = '''
 CREATE TABLE history (
   tid TEXT PRIMARY KEY, 
@@ -40,20 +37,27 @@ class DatabaseService {
   bool get isInitialized => _db.isOpen;
 
   Future<void> init() async {
-    // Web 平台：使用 Web 版本的 FFI
+    // Web 平台：使用内存数据库（功能受限）
     if (kIsWeb) {
-      // 初始化 Web FFI
-      sqflite_ffi_web.sqfliteFfiInit();
-      databaseFactory = sqflite_ffi_web.databaseFactoryFfi;
-      
-      _db = await openDatabase(
-        'keylol_flutter.db',
-        version: 1,
-        onCreate: (db, version) async {
-          await db.execute(historyDdl);
-          await db.execute(favoriteDdl);
-        },
-      );
+      try {
+        _db = await openDatabase(
+          inMemoryDatabasePath,
+          version: 1,
+          onCreate: (db, version) async {
+            await db.execute(historyDdl);
+            await db.execute(favoriteDdl);
+          },
+        );
+        print('[DatabaseService] Web 平台使用内存数据库（数据不持久化）');
+      } catch (e) {
+        // Web 平台数据库初始化失败
+        print('[DatabaseService] Web 数据库初始化失败: $e');
+        // 创建一个空数据库以避免应用崩溃
+        _db = await openDatabase(
+          inMemoryDatabasePath,
+          version: 1,
+        );
+      }
       return;
     }
 
