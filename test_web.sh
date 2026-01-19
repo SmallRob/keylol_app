@@ -17,8 +17,8 @@ fi
 echo "开始构建并运行 Web 应用..."
 echo ""
 
-# 运行 Flutter Web 应用
-flutter run -d chrome
+# 运行 Flutter Web 应用 (禁用浏览器安全策略以解决本地 CORS 问题)
+flutter run -d chrome --web-browser-flag "--disable-web-security"
 
 echo ""
 echo "========================================"

@@ -6,7 +6,7 @@ import 'package:sqflite/sqflite.dart';
 class FavoriteRepository {
   final SharedPreferences _prefs;
   final Keylol _client;
-  late final Database _db;
+  final Database? _db;
 
   FavoriteRepository(this._prefs, this._db, this._client);
 
@@ -31,6 +31,7 @@ class FavoriteRepository {
   }
 
   Future<void> reload() async {
+    if (_db == null) return;
     List<FavThread> favThreads = [];
 
     var page = 1;
@@ -47,9 +48,9 @@ class FavoriteRepository {
       return;
     }
 
-    await _db.delete('favorite');
+    await _db!.delete('favorite');
 
-    final batch = _db.batch();
+    final batch = _db!.batch();
     for (final favThread in favThreads) {
       batch.insert(
         'favorite',
@@ -87,8 +88,9 @@ class FavoriteRepository {
   }
 
   Future<void> remove(String tid, String formHash) async {
+    if (_db == null) return;
     final results =
-        await _db.query('favorite', where: 'id = ?', whereArgs: [tid]);
+        await _db!.query('favorite', where: 'id = ?', whereArgs: [tid]);
     if (results.isEmpty) {
       return;
     }
@@ -99,14 +101,15 @@ class FavoriteRepository {
       talker.error('取消收藏帖子失败 message: ${resp.message}');
     }
 
-    await _db.delete('favorite', where: 'fav_id = ?', whereArgs: [favId]);
+    await _db!.delete('favorite', where: 'fav_id = ?', whereArgs: [favId]);
   }
 
   Future<bool> favored(String tid) async {
     await autoReload();
 
+    if (_db == null) return false;
     final results =
-        await _db.query('favorite', where: 'id = ?', whereArgs: [tid]);
+        await _db!.query('favorite', where: 'id = ?', whereArgs: [tid]);
     return results.isNotEmpty;
   }
 }
